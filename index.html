@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM History 09 &mdash; Chinese Frontier Labs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a; --bg-card: #0d1117; --bg-code: #161b22;
+            --text-primary: #e6edf3; --text-secondary: #8b949e;
+            --accent: #A371F7; --accent-dim: #A371F744; --accent-glow: #A371F733;
+            --accent-2: #FF7B72; --accent-3: #F0A726; --accent-4: #3FB950;
+            --border: #21262d;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-body: 'Inter', sans-serif;
+            --max-width: 900px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 17px; line-height: 1.7; overflow-x: hidden; }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1.5rem; text-align: center; position: relative; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 600px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+        .hero > * { position: relative; z-index: 1; }
+        .series-label { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem; }
+        .hero h1 .accent { color: var(--accent); }
+        .hero .subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 640px; margin-bottom: 2rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2.5rem; }
+        .tag { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-dim); white-space: nowrap; }
+        .tag.r { border-color: var(--accent-2); color: var(--accent-2); background: rgba(255,123,114,0.10); }
+        .tag.y { border-color: var(--accent-3); color: var(--accent-3); background: rgba(240,167,38,0.10); }
+        .tag.g { border-color: var(--accent-4); color: var(--accent-4); background: rgba(63,185,80,0.10); }
+        .pipeline { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.25rem; margin-bottom: 1rem; max-width: var(--max-width); }
+        .pipeline-step { font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.7rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); white-space: nowrap; }
+        .pipeline-arrow { color: var(--accent); font-size: 0.9rem; font-weight: 700; }
+        .slide { min-height: 100vh; max-width: var(--max-width); margin: 0 auto; padding: 4rem 1.5rem; position: relative; display: flex; flex-direction: column; justify-content: center; }
+        .slide-number { font-family: var(--font-display); font-size: 5rem; font-weight: 700; color: var(--accent-dim); position: absolute; top: 2rem; right: 1.5rem; line-height: 1; user-select: none; }
+        .slide h2 { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; line-height: 1.25; }
+        .slide h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .slide p { margin-bottom: 1rem; color: var(--text-secondary); }
+        .slide p strong { color: var(--text-primary); }
+        .slide ul, .slide ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--text-secondary); }
+        .slide li { margin-bottom: 0.4rem; }
+        .slide li strong { color: var(--text-primary); }
+        .slide code { font-family: var(--font-mono); font-size: 0.88em; background: var(--bg-code); padding: 0.1rem 0.35rem; border-radius: 3px; color: var(--accent); }
+        .table-wrap { overflow-x: auto; margin: 1.25rem 0; border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: var(--bg-code); color: var(--accent); font-weight: 600; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-family: var(--font-display); white-space: nowrap; }
+        td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: rgba(13, 17, 23, 0.5); }
+        .diagram-grid { display: grid; gap: 0.75rem; margin: 1.5rem 0; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+        .diagram-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .diagram-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .diagram-panel { padding: 1rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; }
+        .diagram-panel.accent-border { border-left: 3px solid var(--accent); }
+        .diagram-panel.r { border-left: 3px solid var(--accent-2); }
+        .diagram-panel.y { border-left: 3px solid var(--accent-3); }
+        .diagram-panel.g { border-left: 3px solid var(--accent-4); }
+        .diagram-panel h4 { font-family: var(--font-display); font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .diagram-panel.r h4 { color: var(--accent-2); }
+        .diagram-panel.y h4 { color: var(--accent-3); }
+        .diagram-panel.g h4 { color: var(--accent-4); }
+        .diagram-panel p, .diagram-panel ul { font-size: 0.9rem; }
+        .callout { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0; }
+        .callout p { margin-bottom: 0; }
+        .callout .callout-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+        .callout.r { border-left-color: var(--accent-2); } .callout.r .callout-label { color: var(--accent-2); }
+        .callout.y { border-left-color: var(--accent-3); } .callout.y .callout-label { color: var(--accent-3); }
+        .callout.g { border-left-color: var(--accent-4); } .callout.g .callout-label { color: var(--accent-4); }
+        .quote { font-family: var(--font-display); font-size: 1.15rem; font-style: italic; color: var(--text-primary); padding: 1rem 1.5rem; border-left: 3px solid var(--accent); background: var(--bg-card); margin: 1.25rem 0; border-radius: 0 8px 8px 0; }
+        .quote .attr { display: block; margin-top: 0.5rem; font-style: normal; font-size: 0.85rem; color: var(--text-secondary); font-family: var(--font-mono); }
+        .contents-list { list-style: none; padding-left: 0; counter-reset: contents; }
+        .contents-list li { counter-increment: contents; padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+        .contents-list li:last-child { border-bottom: none; }
+        .contents-list li::before { content: counter(contents, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 2rem; }
+        .contents-list a { color: var(--text-primary); text-decoration: none; }
+        .contents-list a:hover { color: var(--accent); }
+        .footer { text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .person-card { display: grid; grid-template-columns: 90px 1fr; gap: 1rem; padding: 1rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.6rem; }
+        .person-photo { width: 90px; height: 90px; border-radius: 50%; background: var(--accent-dim); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; color: var(--accent); }
+        .person-card h4 { font-family: var(--font-display); margin-bottom: 0.2rem; color: var(--text-primary); }
+        .person-card .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+        .person-card p { font-size: 0.88rem; margin: 0; }
+        @media (max-width: 640px) {
+            .slide { padding: 3rem 1rem; min-height: auto; }
+            .slide-number { font-size: 3rem; top: 1.5rem; right: 1rem; }
+            .slide h2 { font-size: 1.5rem; }
+            .diagram-grid.cols-2, .diagram-grid.cols-3 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
+            table { font-size: 0.78rem; }
+            .person-card { grid-template-columns: 60px 1fr; }
+            .person-photo { width: 60px; height: 60px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <div class="series-label">LLM History Series &mdash; Presentation 09</div>
+    <h1><span class="accent">Chinese Frontier Labs</span> &mdash; The R1 Moment</h1>
+    <p class="subtitle">A serious technical and human portrait of the Chinese frontier-lab ecosystem &mdash; DeepSeek, Qwen, Kimi, Zhipu, MiniMax, 01.AI, Baidu Ernie. How efficient training and open weights came naturally under export-control pressure, and why the January 2025 R1 release reordered what people think the frontier looks like.</p>
+
+    <div class="tags">
+        <span class="tag y">DeepSeek</span><span class="tag y">Qwen</span><span class="tag g">Moonshot/Kimi</span>
+        <span class="tag g">Zhipu/GLM</span><span class="tag">MiniMax</span><span class="tag r">01.AI</span>
+        <span class="tag r">Ernie</span><span class="tag">Jan 2025 R1</span>
+    </div>
+
+    <div class="pipeline">
+        <span class="pipeline-step">Tsinghua / Peking pipeline</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">2022 wave of labs</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Export controls (Oct 2022)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Efficient training era</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">DeepSeek V3 (Dec 2024)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">R1 (Jan 2025)</span>
+    </div>
+</header>
+
+<section class="slide" id="slide-00">
+    <div class="slide-number">00</div>
+    <h2>What This Deck Covers</h2>
+    <p>The Chinese frontier-adjacent labs as serious research institutions, not as geopolitical talking points. The technical contributions (efficient training, MoE architectures, open-weight releases), the people, the pipelines, and the constraints &mdash; particularly export controls on advanced GPUs &mdash; that have shaped how the work has been done.</p>
+    <ul class="contents-list">
+        <li><a href="#slide-01">The Setting &mdash; Chinese Tech, Compute, Export Controls</a></li>
+        <li><a href="#slide-02">DeepSeek &mdash; Liang Wenfeng &amp; High-Flyer</a></li>
+        <li><a href="#slide-03">The R1 Moment &mdash; January 2025</a></li>
+        <li><a href="#slide-04">Qwen / Alibaba DAMO</a></li>
+        <li><a href="#slide-05">Moonshot AI / Kimi</a></li>
+        <li><a href="#slide-06">Zhipu AI / GLM</a></li>
+        <li><a href="#slide-07">MiniMax, 01.AI, Baidu Ernie</a></li>
+        <li><a href="#slide-08">The Talent Pipeline &mdash; Tsinghua, Peking, USTC</a></li>
+        <li><a href="#slide-09">Constraints &mdash; Chips, Data, Regulation</a></li>
+        <li><a href="#slide-10">Why Open Weights Came Naturally</a></li>
+        <li><a href="#slide-11">The Geopolitical Frame</a></li>
+        <li><a href="#slide-12">Cheat Sheet</a></li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-01">
+    <div class="slide-number">01</div>
+    <h2>The Setting &mdash; Chinese Tech, Compute, Export Controls</h2>
+    <p>The Chinese AI ecosystem in 2026 looks unlike its US counterpart in three structural ways. Each shaped what the labs ended up building.</p>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel accent-border">
+            <h4>1. Big-tech context</h4>
+            <p>Alibaba, Tencent, Baidu, ByteDance, Huawei each run sizeable AI research arms with substantial commercial revenue. Frontier-LLM work happens in both these incumbents (Qwen at Alibaba, Ernie at Baidu, Hunyuan at Tencent, Doubao at ByteDance) and in independent start-ups (DeepSeek, Moonshot, Zhipu, MiniMax, 01.AI).</p>
+        </div>
+        <div class="diagram-panel y">
+            <h4>2. Export-control pressure</h4>
+            <p>October 2022 US Department of Commerce restricted A100/H100 sales to China. October 2023 tightened to cover the workaround H800/A800 chips. The most-capable training-class GPUs available legally in China since are H20 and others with deliberately reduced interconnect bandwidth. <strong>This pressure has been the dominant external constraint on Chinese frontier training</strong> for three years.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>3. Domestic regulation</h4>
+            <p>The 2023 Generative AI rules require pre-deployment safety reviews for consumer-facing models, content alignment with national-security guidelines, and disclosure obligations. The regulatory regime is much more prescriptive on output content than the US or EU equivalents, but largely permissive on training and architecture.</p>
+        </div>
+    </div>
+
+    <div class="callout y">
+        <div class="callout-label">A useful frame</div>
+        <p>The export-control pressure is the most-discussed factor and probably overrated as a long-run constraint. The Chinese labs have responded by becoming genuinely better at efficiency &mdash; smaller training runs, more aggressive MoE, more careful curriculum, more systems-level optimisation. Several technical innovations widely credited to DeepSeek and others (Multi-head Latent Attention, optimised pipeline schedules, FP8 production training) were partly motivated by the chip constraints. The constraint produced techniques that travel.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-02">
+    <div class="slide-number">02</div>
+    <h2>DeepSeek &mdash; Liang Wenfeng &amp; High-Flyer</h2>
+    <p>DeepSeek is the most distinctive of the Chinese frontier labs because it is essentially the AI research arm of a quantitative hedge fund. <strong>High-Flyer</strong> (also written as <em>Huanfang</em>, &#24187;&#26041;) is a quantitative trading firm based in Hangzhou, founded in 2015 by <strong>Liang Wenfeng</strong> and a small group of Zhejiang University alumni.</p>
+
+    <div class="person-card">
+        <div class="person-photo">LW</div>
+        <div>
+            <h4>Liang Wenfeng &mdash; founder, High-Flyer &amp; DeepSeek</h4>
+            <div class="role">Zhejiang University (CS); High-Flyer founded 2015; DeepSeek announced 2023</div>
+            <p>Chinese. Worked on quantitative trading using ML methods through the late 2010s; High-Flyer became one of the larger Chinese quant funds. The fund accumulated a substantial GPU cluster (reportedly tens of thousands of A100/H800 class GPUs) before the export controls landed, and Liang reallocated a meaningful share of that compute to AI research starting around 2021. <strong>This is the single most important fact about DeepSeek</strong>: it was an unusually well-resourced AI research start-up funded by a profitable trading business, with an existing in-house infrastructure team and unusual freedom from short-term commercial pressure. Liang himself maintains a low public profile but has given a small number of widely-circulated interviews to Chinese tech press, framing the lab's mission as pushing open-weight frontier capability.</p>
+        </div>
+    </div>
+
+    <h3>The DeepSeek model line</h3>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Date</th><th>Model</th><th>What it added</th></tr></thead>
+        <tbody>
+            <tr><td>2023</td><td>DeepSeek LLM, DeepSeek Coder</td><td>First open-weight releases; competitive but not headline-grabbing.</td></tr>
+            <tr><td>May 2024</td><td>DeepSeek V2 (236B MoE, 21B active)</td><td>First wide-attention release. Multi-head Latent Attention (MLA) saves KV-cache memory dramatically. Aggressive open-weight licensing.</td></tr>
+            <tr><td>Dec 2024</td><td>DeepSeek V3 (671B MoE, 37B active)</td><td>Frontier-quality base model. Reportedly trained for ~$5.5 M of cluster time (a number the company published; widely debated).</td></tr>
+            <tr><td>Jan 2025</td><td>DeepSeek R1</td><td>Reasoning model trained with pure RL on chains of thought. Matches OpenAI o1 on most benchmarks. Open weights, MIT-style licence.</td></tr>
+            <tr><td>2025</td><td>R1-distill family</td><td>Smaller open-weight models distilling R1's reasoning behaviour. Most-downloaded models on Hugging Face for months.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">The hedge-fund-as-AI-lab structure</div>
+        <p>The unusual structural feature of DeepSeek is that it does not need outside fundraising in the way most start-ups do. High-Flyer's trading revenue funds the research; the lab's open-weight releases double as recruitment tools and as strategic public goods. Liang has framed this in interviews as a long-horizon bet on Chinese AI capability rather than as a near-term commercial play. The structure gives DeepSeek an unusual freedom to publish weights and recipes, and may be why it has done so more aggressively than many of the other Chinese labs.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-03">
+    <div class="slide-number">03</div>
+    <h2>The R1 Moment &mdash; January 2025</h2>
+    <p>DeepSeek R1 was released on 20 January 2025 alongside a detailed technical report. It is one of the most important single releases in LLM history.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>What was technically novel</h4>
+            <ul>
+                <li><strong>R1-Zero</strong> &mdash; trained with pure reinforcement learning on the base model with rule-based reward (correctness on math/code), no supervised fine-tuning on chain-of-thought data. The RL produced long, structured reasoning behaviour spontaneously.</li>
+                <li><strong>R1</strong> &mdash; adds a small amount of supervised fine-tuning before RL for human-readable formatting.</li>
+                <li>Group Relative Policy Optimization (GRPO) &mdash; their RL algorithm, simpler and cheaper than PPO.</li>
+                <li>Open weights, open paper, open code for inference.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>What was strategically novel</h4>
+            <ul>
+                <li>Frontier-tier reasoning capability available to anyone with hardware.</li>
+                <li>Detailed recipe enabling other labs to replicate within weeks.</li>
+                <li>Training cost an order of magnitude (or more) below US frontier estimates.</li>
+                <li>The Chinese frontier was suddenly visibly close to the western one.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>The market reaction</h3>
+    <p>NVIDIA's stock fell 17% on 27 January 2025 (the largest single-day market-cap loss in stock-market history at that point). The proximate cause was a re-evaluation of how much frontier-AI training compute was actually needed if Chinese-style efficiency was reproducible. The longer-run effect on the AI-infrastructure investment narrative is still being processed.</p>
+
+    <div class="quote">
+        We did not set out to make a political statement. We saw a way to do reasoning training more efficiently, we ran the experiments, the results were good, and we published.
+        <span class="attr">&mdash; Liang Wenfeng, paraphrased from interviews following the R1 release. The lab's external posture has been deliberately low-key relative to the market reaction.</span>
+    </div>
+
+    <div class="callout y">
+        <div class="callout-label">The honest accounting on costs</div>
+        <p>The widely-cited "$5.5 M training cost" for DeepSeek V3 is the marginal cost of the final training run, not the total capital invested. The actual lab cost (people, prior runs, infrastructure built up over years) is much higher. But on any fair accounting, DeepSeek V3 / R1 was trained at substantially lower compute cost than its US-frontier-lab counterparts, and the techniques are reproducible. That's the part that mattered.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-04">
+    <div class="slide-number">04</div>
+    <h2>Qwen / Alibaba DAMO</h2>
+    <p>Alibaba's DAMO Academy ("Discovery, Adventure, Momentum and Outlook"; the name is famously a Jack Ma flourish) is the company's research arm. Its largest LLM programme is the <strong>Qwen</strong> family.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Qwen the line</h4>
+            <ul>
+                <li>Qwen 1.0 (Aug 2023) &mdash; first open-weight release.</li>
+                <li>Qwen 1.5, 2, 2.5 family (2024) &mdash; sizes from 0.5B to 110B; multimodal variants (Qwen-VL, Qwen-Audio).</li>
+                <li>Qwen 3 (2025) &mdash; expanded MoE line; competitive at the frontier on some benchmarks.</li>
+                <li>Qwen Chat / Qwen Coder / Qwen Math &mdash; specialist sub-lines.</li>
+                <li>Bailing/Marco-o1 reasoning variants in 2025.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Why Qwen matters</h4>
+            <ul>
+                <li>Most-downloaded open-weight model family on Hugging Face for much of 2024.</li>
+                <li>Strong multilingual coverage (especially Chinese and Asian languages where Llama is weak).</li>
+                <li>The dominant open-weight option for most non-Chinese applications outside the English-language frontier.</li>
+                <li>Backed by Alibaba Cloud's serving infrastructure for commercial customers.</li>
+            </ul>
+        </div>
+    </div>
+
+    <p>Senior leadership of the Qwen programme is associate-distinguished engineer level inside Alibaba; the lab is large (low thousands of researchers in DAMO overall) but the Qwen team specifically is a few hundred. The most public face is <strong>Junyang Lin</strong>, who has been broadly visible as the team's external voice on Twitter / X.</p>
+
+    <div class="callout">
+        <div class="callout-label">A pattern: the big-tech labs vs the start-ups</div>
+        <p>Qwen, Hunyuan (Tencent), Doubao (ByteDance) and Ernie (Baidu) are big-tech research arms. They have effectively unlimited capital and can afford long timelines. The independent labs &mdash; DeepSeek, Moonshot, Zhipu, MiniMax, 01.AI &mdash; tend to be smaller, more research-aggressive, and more open-weight by default. The two groups serve genuinely different roles in the Chinese ecosystem, much as Microsoft Research vs OpenAI does in the US.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-05">
+    <div class="slide-number">05</div>
+    <h2>Moonshot AI / Kimi</h2>
+    <p>Moonshot AI was founded in March 2023 in Beijing by <strong>Yang Zhilin</strong>, a young researcher with a Tsinghua and CMU background. Its flagship product is <strong>Kimi</strong>, a consumer-chat assistant that for much of 2024 was one of the most-used Chinese chatbots.</p>
+
+    <div class="person-card">
+        <div class="person-photo">YZ</div>
+        <div>
+            <h4>Yang Zhilin (&#26472;&#26893;&#40607;) &mdash; founder, Moonshot AI</h4>
+            <div class="role">Tsinghua (BS) &rarr; CMU (PhD, William Cohen) &rarr; Recurrent.AI &rarr; Moonshot</div>
+            <p>One of the more academically credentialed of the Chinese AI-lab founders. Co-author Transformer-XL and XLNet during his PhD at CMU. Returned to China around 2019, founded Recurrent.AI, then Moonshot in 2023. Public posture is more research-focused than most peers; gives technical talks and Q&amp;As frequently.</p>
+        </div>
+    </div>
+
+    <p>Kimi specialises in long-context reading and reasoning &mdash; <strong>200k Chinese-character context launched February 2024, 2 M-character context December 2024</strong>, ahead of the western frontier on context length for a window of months. The k1.5 reasoning model in early 2025 is competitive with R1 on math benchmarks at much smaller scale.</p>
+
+    <div class="callout y">
+        <div class="callout-label">A point of differentiation</div>
+        <p>Among the Chinese labs, Moonshot has been the most aggressive on context-length-as-product-feature. Kimi pushed long-context models when the rest of the field was still at 8&ndash;32k. The product use cases &mdash; uploading entire textbooks or codebases for chat &mdash; landed strongly with Chinese knowledge workers, and gave Moonshot a distinctive consumer brand position.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-06">
+    <div class="slide-number">06</div>
+    <h2>Zhipu AI / GLM</h2>
+    <p>Zhipu AI (&#26234;&#35889;&#28165;&#35328;) was founded in 2019 as a spinoff from Tsinghua University's Knowledge Engineering Group, led by <strong>Tang Jie</strong> (a senior Tsinghua professor) and a team of Tsinghua PhDs.</p>
+
+    <p>The lab's flagship line is <strong>GLM</strong> (General Language Model), a hybrid encoder-decoder family that has been actively published since 2021. GLM-130B (released 2022) was one of the largest open-weight models from any lab anywhere at the time. ChatGLM-6B was the first widely-deployed Chinese-language consumer chat assistant. By 2025 the GLM line includes specialist variants for coding (CogCodeGeeX), vision-language (CogVLM), agents and reasoning.</p>
+
+    <div class="person-card">
+        <div class="person-photo">TJ</div>
+        <div>
+            <h4>Tang Jie (&#21776;&#26480;) &mdash; co-founder, Chief Scientist</h4>
+            <div class="role">Tsinghua University professor; co-founder Zhipu AI</div>
+            <p>Senior academic at Tsinghua's Department of Computer Science; ran the Knowledge Engineering Group that built much of China's academic-NLP toolkit before LLMs (AMiner, the academic-paper-and-citation graph, is also his work). Zhipu is in many ways an industrial spinout of an established academic group, with the cultural posture that implies &mdash; more publications, more PhD-style mentoring of junior researchers, slower commercial cadence.</p>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">A useful pattern</div>
+        <p>Zhipu sits in the same structural position in Chinese AI as Allen AI does in US AI: a research-credentialed lab with an academic cultural lineage that publishes more than its industrial peers and trains more junior researchers. Its impact is felt in the quality of the next generation of Chinese ML researchers as much as in its product-shipping cadence.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-07">
+    <div class="slide-number">07</div>
+    <h2>MiniMax, 01.AI, Baidu Ernie</h2>
+    <p>The remaining major Chinese frontier-or-adjacent labs.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>MiniMax</h4>
+            <p>Founded 2021 by <strong>Yan Junjie</strong>, ex-SenseTime senior vision researcher. Based in Shanghai. Built consumer chatbot Talkie / Glow plus the MiniMax-01 series of MoE models. The first to ship a 4M-token context window product (early 2025). Strong on multimodal (audio, video) where many Chinese labs are weaker. Cap-table is a mix of Tencent, Alibaba and tier-1 venture investors.</p>
+        </div>
+        <div class="diagram-panel y">
+            <h4>01.AI</h4>
+            <p>Founded 2023 by <strong>Kai-Fu Lee</strong>. Lee is one of the most-recognisable Chinese tech figures &mdash; ex-Apple, ex-Microsoft Research Asia (which he founded in 1998 and ran for years), ex-Google China president, founder of Sinovation Ventures. 01.AI's <strong>Yi</strong> model line is an open-weight family that briefly led on some Chinese-language benchmarks in 2024. Cultural posture is the most international among the Chinese labs &mdash; Lee speaks publicly in English to western audiences and has substantial cross-Pacific networks.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Baidu Ernie</h4>
+            <p>The longest-running Chinese LLM programme &mdash; ERNIE 1.0 was released in 2019, before GPT-3. The ERNIE Bot consumer chatbot launched in March 2023 (a few months after ChatGPT) and has been Baidu's flagship AI product since. Architecture-wise an early advocate of knowledge-graph integration into pretraining. Currently runs on Baidu's Kunlun in-house chips for some inference workloads. Senior figures: <strong>Wang Haifeng</strong> (CTO of Baidu) is the long-serving research leader.</p>
+        </div>
+        <div class="diagram-panel r">
+            <h4>Tencent Hunyuan, ByteDance Doubao</h4>
+            <p>Tencent's Hunyuan model line and ByteDance's Doubao are big-tech research arms with substantial in-house adoption (Hunyuan in WeChat, Doubao in Douyin/TikTok). Less internationally visible than Qwen because the products are mostly consumed by their parent companies' Chinese consumer apps, but technically serious. Doubao in particular has a large Chinese-language consumer footprint &mdash; for some periods of 2024 it was the largest-by-DAU Chinese AI chat product.</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide" id="slide-08">
+    <div class="slide-number">08</div>
+    <h2>The Talent Pipeline &mdash; Tsinghua, Peking, USTC</h2>
+    <p>The Chinese frontier-lab cohort is drawn from a strikingly concentrated pipeline. Three universities &mdash; <strong>Tsinghua</strong>, <strong>Peking</strong> and <strong>USTC</strong> (University of Science and Technology of China) &mdash; produce most of the senior research talent.</p>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel accent-border">
+            <h4>Tsinghua University, Beijing</h4>
+            <p>The most concentrated computer-science programme in China. Yao Class (founded by Andrew Yao after his return from Princeton) is a famously selective undergraduate stream that has produced disproportionate numbers of senior CS researchers, including several Chinese-AI-lab founders. Tang Jie (Zhipu), Yang Zhilin (Moonshot), Wang Xiaochuan (Sogou/Baichuan), Tang Wei and many DeepSeek senior staff have Tsinghua links.</p>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Peking University, Beijing</h4>
+            <p>Strong NLP and ML faculty &mdash; Maosong Sun, Xipeng Qiu, Yunfeng Liu, Furong Peng. Slightly more theory-leaning than Tsinghua. Many DeepSeek and Qwen researchers come from PKU.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>USTC, Hefei</h4>
+            <p>Smaller but technically prestigious. Strong in computer-vision and quantum-computing more than NLP per se; nonetheless feeds the Chinese frontier through its alumni in Microsoft Research Asia, ByteDance and DeepMind-style trajectories.</p>
+        </div>
+    </div>
+
+    <h3>The MSRA factor</h3>
+    <p>An unusual structural fact: <strong>Microsoft Research Asia (MSRA)</strong>, founded 1998 by Kai-Fu Lee and run for years from a building in Beijing's Zhongguancun district, was for two decades the most important industrial research lab in China. Most senior Chinese AI researchers under 50 either did internships, postdocs or full-time stints at MSRA before moving to Chinese big-tech or founding their own labs. The Chinese AI ecosystem is, in talent-pipeline terms, an MSRA diaspora as much as a Tsinghua/PKU one.</p>
+
+    <div class="callout y">
+        <div class="callout-label">The senior advisors</div>
+        <p><strong>Andrew Yao</strong> (Tsinghua, Yao Class), <strong>Kai-Fu Lee</strong> (01.AI / Sinovation), <strong>Harry Shum</strong> (ex-Microsoft EVP, Tsinghua chair), <strong>Wang Haifeng</strong> (Baidu CTO), <strong>Tang Jie</strong> (Zhipu), and a handful of senior Tsinghua/PKU faculty form a small but tightly networked senior cohort that maps roughly onto the role Hinton/Bengio/LeCun and their immediate students play in the western field. Most research lineages run through them.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-09">
+    <div class="slide-number">09</div>
+    <h2>Constraints &mdash; Chips, Data, Regulation</h2>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel r">
+            <h4>Chips</h4>
+            <p>The H800 ban (Oct 2023) and subsequent tightening pushed Chinese labs to: (1) make better use of older A100/H100 stockpiles purchased before controls; (2) work with H20 (the deliberately downgraded current-gen chip available legally); (3) use Huawei's domestic Ascend 910B (improving but still well behind H100 on most workloads); (4) get more out of every chip via efficient training.</p>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Data</h4>
+            <p>Chinese labs have unusually rich Chinese-language training data, including Baidu Baike, the academic paper graph (AMiner), specialised corpora on Chinese law / medicine / finance. They have less coverage of niche-English-language data than US labs. Pretraining mixes typically reflect this with stronger Chinese / weaker English share than US-lab models.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Regulation</h4>
+            <p>The 2023 Generative AI rules require pre-deployment safety reviews and content alignment with national-security guidelines. In practice this primarily affects post-training and consumer-facing deployment; pretraining and base models are largely unconstrained. The regulatory environment is restrictive on outputs, permissive on architecture &mdash; the opposite of where US/EU regulation is heading.</p>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Why the chip constraint matters less than people think</div>
+        <p>The bottleneck on frontier capability is not chip count alone; it is the product of (chips) &times; (data) &times; (algorithmic efficiency). The export controls hit the first factor hard. The Chinese labs responded by getting much better at the third &mdash; algorithmic and systems efficiency &mdash; and that has compounded across releases. The pattern is consistent with how research constraints have historically driven innovation in computer architecture, microelectronics and database systems: the most efficient designs come from teams without the option of throwing money at the problem.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-10">
+    <div class="slide-number">10</div>
+    <h2>Why Open Weights Came Naturally</h2>
+    <p>Almost all of the Chinese frontier labs default to open weights. This is the opposite of the US-frontier pattern. The reasons cluster:</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Strategic</h4>
+            <ul>
+                <li>If you are not the global API-revenue leader, the marginal economics of open weights versus closed are different. Distribution via Hugging Face or Model Scope is cheap; you are not foregoing $1 B/year of API revenue.</li>
+                <li>Open weights are a recruitment tool. They are also a signal of seriousness to the global research community.</li>
+                <li>They are a public-good contribution that is read in policy circles as China-positive.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Practical</h4>
+            <ul>
+                <li>Open weights build a community that helps debug, fine-tune and find use cases the lab itself does not cover.</li>
+                <li>They make export-controlled inference less dependent on any single vendor.</li>
+                <li>They allow non-Chinese deployers to use the models without having to depend on Chinese cloud infrastructure (a politically meaningful detail).</li>
+                <li>They are how Chinese researchers participate in the global field even if their labs are not internationally hosted.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="quote">
+        Chinese labs ship weights for the same reason Linux distributions ship source: it's cheaper than convincing the world to trust you, and the people who would benefit most from trusting you can't.
+        <span class="attr">&mdash; A common framing in 2025 commentary on the open-weight pattern. The exact attribution varies; the analysis has been made in multiple substacks and policy papers.</span>
+    </div>
+
+    <div class="callout y">
+        <div class="callout-label">The reciprocal effect</div>
+        <p>Once DeepSeek, Qwen and a handful of others had shipped frontier-quality open weights, the western open-weight ecosystem (Meta Llama, Mistral) had cover to keep going. The pressure to "match the Chinese on openness" as a competitive feature is a meaningful additional reason Llama 4 and Mistral's recent releases have stayed open-weight. The dynamic is reciprocal in a way that pure US-policy framing tends to miss.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-11">
+    <div class="slide-number">11</div>
+    <h2>The Geopolitical Frame</h2>
+    <p>The Chinese frontier-lab story sits inside a broader geopolitical context that matters for any honest read of where the field is going.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>What is reasonably well-attested</h4>
+            <ul>
+                <li>The Chinese government considers AI capability strategically important, both economically and for national security.</li>
+                <li>The Chinese labs operate within Chinese law, including content-alignment requirements for consumer-facing products.</li>
+                <li>The export-control regime has measurably constrained the rate at which Chinese labs can scale; it has not prevented serious research.</li>
+                <li>The R1 release was a genuine technical achievement and not, as some early reactions suggested, a propaganda exercise. The subsequent replication and extension by labs around the world has confirmed the core technical claims.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel r">
+            <h4>What is genuinely contested</h4>
+            <ul>
+                <li>How close the Chinese frontier is to the US frontier in absolute capability. Estimates vary by 6&ndash;18 months depending on benchmark, source and observer.</li>
+                <li>Whether Chinese-frontier-trained models are systematically constrained on outputs in ways that affect benchmark utility versus real-world utility. The published benchmarks suggest small effects; subjective use suggests sometimes larger ones.</li>
+                <li>How the export-control regime evolves. Several rounds of tightening have happened; further rounds are politically possible.</li>
+                <li>Whether the open-weight pattern continues as Chinese labs reach commercial maturity and face the same incentives that pushed western labs closed.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout y">
+        <div class="callout-label">The honest read</div>
+        <p>Treating the Chinese frontier-lab ecosystem as a serious set of research institutions is the right starting point for any technical observer. The output speaks for itself; the people are well-credentialed; the techniques travel. Geopolitical concerns are legitimate and are properly handled at the policy layer (export controls, deployment restrictions). They do not change what the research is.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-12">
+    <div class="slide-number">12</div>
+    <h2>Cheat Sheet</h2>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>The independent labs</h4>
+            <ul>
+                <li>DeepSeek &mdash; High-Flyer, Hangzhou.</li>
+                <li>Moonshot AI / Kimi &mdash; Yang Zhilin, Beijing.</li>
+                <li>Zhipu AI / GLM &mdash; Tang Jie, Tsinghua.</li>
+                <li>MiniMax &mdash; Yan Junjie, Shanghai.</li>
+                <li>01.AI / Yi &mdash; Kai-Fu Lee, Beijing.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>The big-tech labs</h4>
+            <ul>
+                <li>Qwen &mdash; Alibaba DAMO.</li>
+                <li>Ernie &mdash; Baidu, Wang Haifeng.</li>
+                <li>Hunyuan &mdash; Tencent.</li>
+                <li>Doubao &mdash; ByteDance.</li>
+                <li>Pangu &mdash; Huawei.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Three things to remember</h4>
+            <ul>
+                <li>Export-control pressure forced efficiency innovations that travel.</li>
+                <li>Open weights are the default, for strategic and practical reasons.</li>
+                <li>The Tsinghua/PKU/USTC + MSRA pipeline is the talent infrastructure.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel r">
+            <h4>What's next in the series</h4>
+            <ul>
+                <li>10 &mdash; Future Directions. The only forecast deck in the series. Will date faster than the rest.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <p>Part of the <a href="https://github.com/BrendanJamesLynskey/LLM_Hub_LLM_History">LLM History series</a> in the <a href="https://github.com/BrendanJamesLynskey/LLMs">LLMs hub</a>.</p>
+    <p style="margin-top: 0.5rem;"><a href="https://brendanjameslynskey.github.io/LLM_History_08_Meta_Mistral_xAI_Others/">&larr; 08 Meta, Mistral, xAI &amp; Others</a> &middot; <a href="https://brendanjameslynskey.github.io/LLM_History_10_Future_Directions/">10 Future Directions &rarr;</a></p>
+</footer>
+
+</body>
+</html>
