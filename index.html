@@ -160,7 +160,7 @@
         </div>
         <div class="diagram-panel y">
             <h4>2. Export-control pressure</h4>
-            <p>October 2022 US Department of Commerce restricted A100/H100 sales to China. October 2023 tightened to cover the workaround H800/A800 chips. The most-capable training-class GPUs available legally in China since are H20 and others with deliberately reduced interconnect bandwidth. <strong>This pressure has been the dominant external constraint on Chinese frontier training</strong> for three years.</p>
+            <p>October 2022 US Department of Commerce restricted A100/H100 sales to China. October 2023 tightened to cover the workaround H800/A800 chips. The most-capable training-class GPUs available legally in China since were H20 and others with deliberately reduced interconnect bandwidth, until the US approved H200 sales to approved Chinese customers in December 2025. <strong>This pressure has been the dominant external constraint on Chinese frontier training</strong> for three years.</p>
         </div>
         <div class="diagram-panel g">
             <h4>3. Domestic regulation</h4>
@@ -196,7 +196,7 @@
             <tr><td>2023</td><td>DeepSeek LLM, DeepSeek Coder</td><td>First open-weight releases; competitive but not headline-grabbing.</td></tr>
             <tr><td>May 2024</td><td>DeepSeek V2 (236B MoE, 21B active)</td><td>First wide-attention release. Multi-head Latent Attention (MLA) saves KV-cache memory dramatically. Aggressive open-weight licensing.</td></tr>
             <tr><td>Dec 2024</td><td>DeepSeek V3 (671B MoE, 37B active)</td><td>Frontier-quality base model. Reportedly trained for ~$5.5 M of cluster time (a number the company published; widely debated).</td></tr>
-            <tr><td>Jan 2025</td><td>DeepSeek R1</td><td>Reasoning model trained with pure RL on chains of thought. Matches OpenAI o1 on most benchmarks. Open weights, MIT-style licence.</td></tr>
+            <tr><td>Jan 2025</td><td>DeepSeek R1</td><td>Reasoning model trained with RL on chains of thought (pure RL in R1-Zero; a small SFT cold start in R1). Matches OpenAI o1 on most benchmarks. Open weights, MIT-style licence.</td></tr>
             <tr><td>2025</td><td>R1-distill family</td><td>Smaller open-weight models distilling R1's reasoning behaviour. Most-downloaded models on Hugging Face for months.</td></tr>
         </tbody>
     </table>
@@ -237,10 +237,6 @@
     <h3>The market reaction</h3>
     <p>NVIDIA's stock fell 17% on 27 January 2025 (the largest single-day market-cap loss in stock-market history at that point). The proximate cause was a re-evaluation of how much frontier-AI training compute was actually needed if Chinese-style efficiency was reproducible. The longer-run effect on the AI-infrastructure investment narrative is still being processed.</p>
 
-    <div class="quote">
-        We did not set out to make a political statement. We saw a way to do reasoning training more efficiently, we ran the experiments, the results were good, and we published.
-        <span class="attr">&mdash; Liang Wenfeng, paraphrased from interviews following the R1 release. The lab's external posture has been deliberately low-key relative to the market reaction.</span>
-    </div>
 
     <div class="callout y">
         <div class="callout-label">The honest accounting on costs</div>
@@ -261,7 +257,7 @@
                 <li>Qwen 1.5, 2, 2.5 family (2024) &mdash; sizes from 0.5B to 110B; multimodal variants (Qwen-VL, Qwen-Audio).</li>
                 <li>Qwen 3 (2025) &mdash; expanded MoE line; competitive at the frontier on some benchmarks.</li>
                 <li>Qwen Chat / Qwen Coder / Qwen Math &mdash; specialist sub-lines.</li>
-                <li>Bailing/Marco-o1 reasoning variants in 2025.</li>
+                <li>QwQ reasoning variants (from Nov 2024).</li>
             </ul>
         </div>
         <div class="diagram-panel y">
@@ -297,7 +293,7 @@
         </div>
     </div>
 
-    <p>Kimi specialises in long-context reading and reasoning &mdash; <strong>200k Chinese-character context launched February 2024, 2 M-character context December 2024</strong>, ahead of the western frontier on context length for a window of months. The k1.5 reasoning model in early 2025 is competitive with R1 on math benchmarks at much smaller scale.</p>
+    <p>Kimi specialises in long-context reading and reasoning &mdash; <strong>200k Chinese-character context at launch in October 2023, 2 M-character context in March 2024</strong>, ahead of the western frontier on context length for a window of months. The k1.5 reasoning model in early 2025 is competitive with R1 on math benchmarks at much smaller scale.</p>
 
     <div class="callout y">
         <div class="callout-label">A point of differentiation</div>
@@ -308,9 +304,9 @@
 <section class="slide" id="slide-06">
     <div class="slide-number">06</div>
     <h2>Zhipu AI / GLM</h2>
-    <p>Zhipu AI (&#26234;&#35889;&#28165;&#35328;) was founded in 2019 as a spinoff from Tsinghua University's Knowledge Engineering Group, led by <strong>Tang Jie</strong> (a senior Tsinghua professor) and a team of Tsinghua PhDs.</p>
+    <p>Zhipu AI (&#26234;&#35889;) was founded in 2019 as a spinoff from Tsinghua University's Knowledge Engineering Group, led by <strong>Tang Jie</strong> (a senior Tsinghua professor) and a team of Tsinghua PhDs.</p>
 
-    <p>The lab's flagship line is <strong>GLM</strong> (General Language Model), a hybrid encoder-decoder family that has been actively published since 2021. GLM-130B (released 2022) was one of the largest open-weight models from any lab anywhere at the time. ChatGLM-6B was the first widely-deployed Chinese-language consumer chat assistant. By 2025 the GLM line includes specialist variants for coding (CogCodeGeeX), vision-language (CogVLM), agents and reasoning.</p>
+    <p>The lab's flagship line is <strong>GLM</strong> (General Language Model), a hybrid encoder-decoder family that has been actively published since 2021. GLM-130B (released 2022) was one of the largest open-weight models from any lab anywhere at the time. ChatGLM-6B was the first widely-deployed Chinese-language consumer chat assistant. By 2025 the GLM line includes specialist variants for coding (CodeGeeX), vision-language (CogVLM), agents and reasoning.</p>
 
     <div class="person-card">
         <div class="person-photo">TJ</div>
@@ -364,7 +360,7 @@
         </div>
         <div class="diagram-panel y">
             <h4>Peking University, Beijing</h4>
-            <p>Strong NLP and ML faculty &mdash; Maosong Sun, Xipeng Qiu, Yunfeng Liu, Furong Peng. Slightly more theory-leaning than Tsinghua. Many DeepSeek and Qwen researchers come from PKU.</p>
+            <p>Strong NLP and ML faculty &mdash; Yunfeng Liu, Furong Peng. Slightly more theory-leaning than Tsinghua. Many DeepSeek and Qwen researchers come from PKU.</p>
         </div>
         <div class="diagram-panel g">
             <h4>USTC, Hefei</h4>
